@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #define uint  unsigned int
 #define uchar unsigned char
-#define flash 60   										//显示闪烁速度控制
-#define secbuf 60											//时钟秒走时速度调试
+#define flash 60   				//显示闪烁速度控制
+#define secbuf 60				//时钟秒走时速度调试
 
 uchar code disp_sm[]= {0xc0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90,
                        0x40,0x79,0x24,0x30,0x19,0x12,0x02,0x78,0x00,0x10
@@ -18,7 +18,7 @@ sbit flonc=flag^2;
 
 uchar  buf0,buf1=0;
 uchar msta,cnt1s,beepcnt=0;
-uchar bufs=0;							//初始化数码管选择位
+uchar bufs=0;					//初始化数码管选择位
 uchar msta,tzsta,clksta,bufs,buf0,buf1,buf2,buf3,buf4,buff0,buff1,buff2,buff3,cnt1s;
 uchar bufh0,bufh1,bufm0,bufm1,ledcnt=0;
 bit f,ledf;
@@ -31,7 +31,7 @@ sbit  led=P2^7;
 sbit  sound=P2^0;
 sbit  poi=P0^7;
 
-uchar bdata key,lastkey,key1,lastkey1;//电平有效、沿有效全局变量
+uchar bdata key,lastkey,key1,lastkey1;		//电平有效、沿有效全局变量
 sbit k0=key^5;
 sbit k1=key^3;
 sbit k2=key^2;
@@ -51,28 +51,28 @@ sbit lk6=lastkey1^2;
 sbit lk7=lastkey1^1;
 
 /*子函数声明*/
-void keytest();						//按键测试子程序
-void keyscan();						//矩阵键盘扫描子函数
-void display();						//数码管动态显示子函数
+void keytest();					//按键测试子程序
+void keyscan();					//矩阵键盘扫描子函数
+void display();					//数码管动态显示子函数
 void delay(uint z);				//软件延时子函数
-void keysound();					//有效按键音子函数
-void work0();							//99秒计时模块
-void work1();							//倒计时模块
-void work2();							//报警模块
-void work3();							//空闲散转模块
-void work4();							//二位抽奖机模块
-void work5();							//按位抽奖机模块
-void work6();							//时钟模块
+void keysound();				//有效按键音子函数
+void work0();					//99秒计时模块
+void work1();					//倒计时模块
+void work2();					//报警模块
+void work3();					//空闲散转模块
+void work4();					//二位抽奖机模块
+void work5();					//按位抽奖机模块
+void work6();					//时钟模块
 
 void main() {
 	TH0=0xEC;
-	TL0=0x78;								//T0赋初值
+	TL0=0x78;				//T0赋初值
 	TR0=1;
 	TMOD=1;
 	msta=0;
 	cnt1s=0;
 	sound=0;
-	delay(200);							//上电提示音
+	delay(200);				//上电提示音
 	sound=1;
 	while(1) {
 		keyscan();
@@ -80,7 +80,7 @@ void main() {
 		while(!TF0);
 		TF0=0;
 		TH0=0xEC;
-		TL0=0x78;							//T0重赋初值
+		TL0=0x78;			//T0重赋初值
 		switch(msta) {
 		case 0:
 			work0();
@@ -119,7 +119,7 @@ void delay(uint z) {
 /*动态显示子函数*/
 void display() {
 	static uchar dispcnt;
-	dispcnt++;								//用于位闪
+	dispcnt++;				//用于位闪
 	if(dispcnt>=flash) {
 		dispcnt=0;
 		f300^=1;
@@ -140,7 +140,7 @@ void display() {
 	default:
 		break;
 	}
-	if(flon&&f300) {					//倒计时闪控制
+	if(flon&&f300) {			//倒计时闪控制
 		switch(tzsta) {
 		case 0:
 			CS0=1;
@@ -153,7 +153,7 @@ void display() {
 		}
 	}
 
-	if(flonc&&f300) {					//时钟闪控制
+	if(flonc&&f300) {			//时钟闪控制
 		switch(clksta) {
 		case 0:
 			CS0=1;
@@ -173,7 +173,7 @@ void display() {
 	}
 
 	if(msta==6&&clksta==5) {		//work6()时钟模块解决led闪烁亮度不足问题
-		ledcnt++;									//led500ms闪烁一次
+		ledcnt++;			//led500ms闪烁一次
 		if(ledcnt>=100) {
 			ledf=!ledf;
 			ledcnt=0;
@@ -187,27 +187,27 @@ void display() {
 
 /*按键扫描子程序*/
 void keyscan() {
-	uchar r1,r2;									//采用两个寄存器存键值
+	uchar r1,r2;				//采用两个寄存器存键值
 	static uchar keycnt;
 	P2=0x00^0xef;
-	_nop_();					//扫描k0-k3
-	r1=P2;												//k0-k3键值存入r1
+	_nop_();				//扫描k0-k3
+	r1=P2;					//k0-k3键值存入r1
 	r1&=0x2e;
 	r1^=0x2e;
 
 	P2=0x00^0xbf;
-	_nop_();					//扫描k4-k7
-	r2=P2;												//k4-k7键值存入r2
+	_nop_();				//扫描k4-k7
+	r2=P2;					//k4-k7键值存入r2
 	r2&=0x2e;
 	r2^=0x2e;
 
-	if(r1) {											//判断寄存器r1
+	if(r1) {				//判断寄存器r1
 		keycnt++;
 		if(keycnt>4)
 			key=r1;
 		else
 			key=lastkey;
-	} else if(r2) {									//判断寄存器r2
+	} else if(r2) {				//判断寄存器r2
 		keycnt++;
 		if(keycnt>4)
 			key1=r2;
@@ -330,20 +330,20 @@ void work1() {
 			}
 			i=0;
 		}
-		if(k4) {							//99秒计时模块
+		if(k4) {			//99秒计时模块
 			buf0=buf1=0;
 			flon=0;
 			msta=0;
 			tzsta=0;
 			keysound();
 		}
-		if(k5) {							//倒计时模块
+		if(k5) {			//倒计时模块
 			flon=0;;
 			msta=1;
 			tzsta=0;
 			keysound();
 		}
-		if(k6) {							//二位抽奖机模块
+		if(k6) {			//二位抽奖机模块
 			flon=0;
 			tzsta=0;
 			keysound();
@@ -378,7 +378,7 @@ void work2() {
 
 	if(x>=3) {
 		buf0=buf1=9;
-		msta=3;					//跳转空闲模块
+		msta=3;				//跳转空闲模块
 		x=0;
 	}
 }
@@ -386,16 +386,16 @@ void work2() {
 /*空闲散转*/
 void work3() {
 	buf0=buf1=0;
-	if(k4) {					//99秒计时模块
+	if(k4) {				//99秒计时模块
 		msta=0;
 		keysound();
 	}
-	if(k5) {					//倒计时模块
+	if(k5) {				//倒计时模块
 		msta=1;
 		tzsta=0;
 		keysound();
 	}
-	if(k6) {					//二位抽奖机模块
+	if(k6) {				//二位抽奖机模块
 		keysound();
 		msta=4;
 	}
@@ -451,7 +451,7 @@ void work4() {
 	}
 }
 
-void work5() {			//按位抽奖机子函数
+void work5() {					//按位抽奖机子函数
 	static uchar i;
 	static uchar randcnt=0;
 	if(k2) {
@@ -515,7 +515,7 @@ void work5() {			//按位抽奖机子函数
 	}
 }
 
-void work6() {				//时钟模块
+void work6() {					//时钟模块
 	static uchar flons,sec,lkbuf;
 	static uint  clkswitch;
 	static bit   c;
@@ -537,7 +537,7 @@ void work6() {				//时钟模块
 			CS0=1;
 		else
 			buf0=bufh0;
-		if(lk3) {								//按键电平有效实现快速加
+		if(lk3) {				//按键电平有效实现快速加
 			lkbuf++;
 			if(lkbuf>=50) {
 				bufh0++;
@@ -573,7 +573,7 @@ void work6() {				//时钟模块
 	}
 	break;
 
-	case 2: {					//设置切换
+	case 2: {						//设置切换
 		sound=0;
 		delay(50);
 		sound=1;
@@ -649,7 +649,7 @@ void work6() {				//时钟模块
 				}
 			}
 		}
-		if(clkswitch>=600) {					//3s切换显示小时、分钟
+		if(clkswitch>=600) {			//3s切换显示小时、分钟
 			c=!c;
 			clkswitch=0;
 		}
@@ -661,7 +661,7 @@ void work6() {				//时钟模块
 			buf1=bufm1;
 		}
 
-//			ledcnt++;								//led闪烁
+//			ledcnt++;			//LED闪烁
 //			if(ledcnt>=100)
 //			{
 //				ledf=!ledf;
@@ -689,5 +689,5 @@ void work6() {				//时钟模块
 			msta=4;
 		}
 	}
-	}
+}
 }
